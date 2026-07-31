@@ -1,0 +1,499 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | United Bank of America{% endblock %}
+
+{% block head %}
+<style>
+    /* Professional user dashboard layout */
+    .dashboard-page {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        padding: 20px 0 40px;
+    }
+
+    .dashboard-wrapper {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 24px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        align-items: start;
+    }
+
+    .dashboard-main {
+        min-width: 0; /* critical: stops grid child overflowing right */
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow-x: hidden;
+    }
+
+    .sidebar {
+        background: var(--primary-white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        padding: 16px 0;
+        height: fit-content;
+        position: sticky;
+        top: 90px;
+        box-sizing: border-box;
+    }
+
+    .sidebar-nav ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .sidebar-nav a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 18px;
+        color: var(--dark-grey);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: var(--transition);
+        border-left: 3px solid transparent;
+    }
+
+    .sidebar-nav a:hover,
+    .sidebar-nav a.active {
+        background: rgba(0, 31, 91, 0.04);
+        color: var(--primary-dark-blue);
+        border-left-color: var(--accent-gold);
+    }
+
+    .sidebar-toggle {
+        display: none;
+        width: 100%;
+        background: var(--accent-gold);
+        color: var(--primary-dark-blue);
+        border: none;
+        padding: 12px 16px;
+        border-radius: var(--radius-md);
+        font-weight: 700;
+        margin-bottom: 16px;
+        cursor: pointer;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    .profile-photo-container {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        background: var(--primary-white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        padding: 20px;
+        margin-bottom: 20px;
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .profile-photo-wrapper {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--accent-gold);
+        flex-shrink: 0;
+        background: var(--light-grey);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .profile-photo-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-photo-wrapper .default-avatar {
+        font-size: 32px;
+    }
+
+    .profile-photo-wrapper .photo-badge {
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        background: var(--success);
+        color: white;
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 50%;
+        border: 2px solid white;
+    }
+
+    .profile-info {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .profile-info h2 {
+        font-size: 22px;
+        color: var(--primary-dark-blue);
+        margin: 0 0 4px;
+        word-break: break-word;
+    }
+
+    .profile-info .sub-info,
+    .profile-info .account-info {
+        opacity: 0.75;
+        font-size: 13px;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        line-height: 1.45;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .summary-card {
+        background: var(--primary-white);
+        padding: 20px;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        box-sizing: border-box;
+        min-width: 0;
+        border-left: 4px solid var(--accent-gold);
+    }
+
+    .summary-card h3 {
+        font-size: 12px;
+        opacity: 0.7;
+        margin: 0 0 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .summary-value {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--primary-dark-blue);
+        word-break: break-word;
+    }
+
+    .section-block {
+        background: var(--primary-white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        padding: 20px;
+        margin-bottom: 20px;
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+
+    .section-header h2 {
+        font-size: 18px;
+        color: var(--primary-dark-blue);
+        margin: 0;
+    }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+        width: 100%;
+    }
+
+    .action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 18px 12px;
+        background: var(--light-grey);
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        color: var(--dark-grey);
+        font-size: 13px;
+        font-weight: 600;
+        border: 1px solid transparent;
+        transition: var(--transition);
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    .action-btn:hover {
+        border-color: var(--accent-gold);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+        color: var(--primary-dark-blue);
+    }
+
+    .table-responsive {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dashboard-main table {
+        width: 100%;
+        min-width: 480px;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .dashboard-main th,
+    .dashboard-main td {
+        padding: 10px 8px;
+        text-align: left;
+        border-bottom: 1px solid var(--border-light);
+        word-break: break-word;
+    }
+
+    .dashboard-main th {
+        font-size: 11px;
+        text-transform: uppercase;
+        color: var(--primary-dark-blue);
+        opacity: 0.85;
+    }
+
+    /* Tablet */
+    @media (max-width: 991px) {
+        .dashboard-wrapper {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .sidebar {
+            display: none;
+            position: static;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .sidebar.open {
+            display: block;
+        }
+
+        .sidebar-toggle {
+            display: block;
+        }
+
+        .summary-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .profile-photo-container {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .profile-info {
+            width: 100%;
+        }
+    }
+
+    /* Phone */
+    @media (max-width: 600px) {
+        .dashboard-page {
+            padding: 12px 0 28px;
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-value {
+            font-size: 22px;
+        }
+
+        .section-block {
+            padding: 16px;
+        }
+
+        .actions-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .profile-photo-wrapper {
+            width: 64px;
+            height: 64px;
+        }
+
+        .profile-info h2 {
+            font-size: 18px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container dashboard-page">
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebarMenu">
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="{{ url_for('user.dashboard') }}" class="active">📊 Overview</a></li>
+                    <li><a href="{{ url_for('user.payment') }}">💸 Payments</a></li>
+                    <li><a href="{{ url_for('user.savings') }}">💰 Savings</a></li>
+                    <li><a href="{{ url_for('user.cards') }}">💳 Cards</a></li>
+                    <li><a href="{{ url_for('user.transaction_history') }}">📊 History</a></li>
+                    <li><a href="{{ url_for('user.settings') }}">⚙️ Settings</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <button type="button" class="sidebar-toggle" onclick="document.getElementById('sidebarMenu').classList.toggle('open')">☰ Menu</button>
+
+            <!-- Profile Photo Section -->
+            <div class="profile-photo-container">
+                <div class="profile-photo-wrapper">
+                    {% if current_user.profile_photo %}
+                    <img src="{{ url_for('static', filename=current_user.profile_photo) }}" alt="Profile Photo"
+                        onerror="this.style.display='none'; this.parentElement.querySelector('.default-avatar').style.display='flex';">
+                    <span class="photo-badge">✓</span>
+                    {% endif %}
+                    <span class="default-avatar"
+                        style="{% if current_user.profile_photo %}display:none;{% endif %}">👤</span>
+                </div>
+                <div class="profile-info">
+                    <h2>Welcome, {{ current_user.username }}</h2>
+                    <div class="sub-info">{{ current_user.get_full_name() or current_user.username }}</div>
+                    <div class="account-info">Account: {{ current_user.account_number or 'N/A' }} • Sort Code: {{
+                        current_user.sort_code or 'N/A' }}</div>
+                    <div class="account-info" style="margin-top: 4px; color: var(--success);">
+                        ✅ {{ 'Verified' if current_user.is_verified else 'Pending Verification' }}
+                    </div>
+                </div>
+            </div>
+
+            <p style="opacity:0.7; margin-bottom: 20px;">Account overview as of <span id="currentDate"></span></p>
+
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <h3>Total Balance</h3>
+                    <div class="summary-value" data-balance>${{ "%.2f"|format(current_user.balance) }}</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Pending Transactions</h3>
+                    <div class="summary-value">{{ transactions|selectattr('status', 'equalto', 'pending')|list|length }}
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <h3>Total Transactions</h3>
+                    <div class="summary-value">{{ transactions|length }}</div>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header">
+                    <h2>Quick Actions</h2>
+                </div>
+                <div class="actions-grid">
+                    <button class="action-btn"
+                        onclick="showToast('To receive funds, share your username: {{ current_user.username }}', 'info')">
+                        <span class="action-icon">📥</span> Receive
+                    </button>
+                    <a href="{{ url_for('user.savings') }}" class="action-btn">
+                        <span class="action-icon">💰</span> Save
+                    </a>
+                    <a href="{{ url_for('user.transaction_history') }}" class="action-btn">
+                        <span class="action-icon">📊</span> History
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="section-block">
+                <div class="section-header">
+                    <h2>Recent Transactions</h2>
+                    <a href="{{ url_for('user.transaction_history') }}"
+                        style="color:var(--accent-gold); font-weight:600;">View All →</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if transactions %}
+                            {% for t in transactions %}
+                            <tr>
+                                <td>{{ t.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>{{ t.sender.username }}</td>
+                                <td>{{ t.receiver.username if t.receiver else 'International' }}</td>
+                                <td
+                                    class="{% if t.sender_id == current_user.id %}amount-out{% else %}amount-in{% endif %}">
+                                    {% if t.sender_id == current_user.id %}-{% endif %}${{ "%.2f"|format(t.amount) }}
+                                </td>
+                                <td><span class="status-badge status-{{ t.status }}">{{ t.status }}</span></td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center" style="padding:30px; opacity:0.6;">No transactions
+                                    yet</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+        day: 'numeric', month: 'long', year: 'numeric'
+    });
+
+    async function updateBalance() {
+        try {
+            const response = await fetch('{{ url_for("api.get_balance") }}');
+            const data = await response.json();
+            if (data.balance !== undefined) {
+                document.querySelector('[data-balance]').textContent = '$' + data.balance.toFixed(2);
+            }
+        } catch (e) { console.error('Failed to update balance:', e); }
+    }
+    setInterval(updateBalance, 30000);
+
+    document.addEventListener('click', function (e) {
+        const sidebar = document.getElementById('sidebarMenu');
+        const toggle = document.querySelector('.sidebar-toggle');
+        if (window.innerWidth <= 991) {
+            if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggle.contains(e.target)) {
+                sidebar.classList.remove('open');
+            }
+        }
+    });
+</script>
+{% endblock %}

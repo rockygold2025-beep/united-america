@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: united-bank-of-america
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn backend:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+    # Note: Free web services spin down after ~15 min idle.
+    # The in-app keep-alive + branded loading overlay softens cold starts.
+    # For always-on, upgrade to Starter ($7/mo) or use an external uptime ping.
