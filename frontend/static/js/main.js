@@ -1425,6 +1425,61 @@ const translations = {
         'transfer_success': 'Transferência criada com sucesso! Aguardando aprovação do administrador.',
         'transfer_failed': 'Falha na transferência. Tente novamente.',
         'network_error': 'Erro de rede. Tente novamente.',
+    },
+    tr: {
+        'home': 'Ana Sayfa',
+        'about': 'Hakkımızda',
+        'contact': 'İletişim',
+        'login': 'Giriş Yap',
+        'register': 'Kayıt Ol',
+        'logout': 'Çıkış Yap',
+        'dashboard': 'Panel',
+        'payments': 'Ödemeler',
+        'savings': 'Tasarruf',
+        'cards': 'Kartlar',
+        'settings': 'Ayarlar',
+        'admin': 'Yönetici',
+        'users': 'Kullanıcılar',
+        'transactions': 'İşlemler',
+        'kyc': 'KYC',
+        'send_money': 'Para Gönder',
+        'local_transfer': 'Yurt İçi Transfer',
+        'international_transfer': 'Uluslararası Transfer',
+        'submit_transfer': 'Transferi Onaya Gönder',
+        'submit_international': '🌍 Uluslararası Transfer Gönder',
+        'enter_pin': '6 haneli işlem PIN kodunuzu girin',
+        'confirm_pin': 'İşlem PIN ile onayla',
+        'invalid_pin': 'Lütfen geçerli 6 haneli PIN girin',
+        'pin_error': 'Geçersiz PIN. Lütfen tekrar deneyin.',
+        'insufficient_balance': 'Yetersiz bakiye',
+        'transfer_success': 'Transfer başarıyla oluşturuldu! Yönetici onayı bekleniyor.',
+        'transfer_failed': 'Transfer başarısız. Lütfen tekrar deneyin.',
+        'network_error': 'Ağ hatası. Lütfen tekrar deneyin.',
+        'amount': 'Tutar',
+        'description': 'Açıklama',
+        'status': 'Durum',
+        'pending': 'Beklemede',
+        'approved': 'Onaylandı',
+        'rejected': 'Reddedildi',
+        'local': 'Yurt İçi',
+        'international': 'Uluslararası',
+        'from': 'Gönderen',
+        'to': 'Alıcı',
+        'date': 'Tarih',
+        'bank_name': 'Banka Adı',
+        'account_holder': 'Hesap Sahibi',
+        'account_number': 'Hesap Numarası',
+        'bank_country': 'Banka Ülkesi',
+        'swift_code': 'SWIFT / BIC Kodu',
+        'transfer_type': 'Transfer Türü',
+        'total_balance': 'Toplam Bakiye',
+        'recent_transactions': 'Son İşlemler',
+        'transaction_history': 'İşlem Geçmişi',
+        'available_balance': 'Kullanılabilir Bakiye',
+        'hero_title': 'Geleceğiniz İçin Bankacılık',
+        'open_account': '🚀 Hesap Açın',
+        'log_in': '🔐 Giriş Yap',
+        'welcome_back': 'Tekrar hoş geldiniz',
     }
 };
 
@@ -1779,7 +1834,8 @@ function getLangCodes() {
         es: { label: '🌐 Español', gt: 'es', path: '/en/es' },
         ko: { label: '🌐 한국어', gt: 'ko', path: '/en/ko' },
         ar: { label: '🌐 العربية', gt: 'ar', path: '/en/ar' },
-        pt: { label: '🌐 Português', gt: 'pt', path: '/en/pt' }
+        pt: { label: '🌐 Português', gt: 'pt', path: '/en/pt' },
+        tr: { label: '🌐 Türkçe', gt: 'tr', path: '/en/tr' }
     };
 }
 
@@ -1813,7 +1869,7 @@ function translatePage(lang) {
     try {
         localStorage.setItem('preferred_language', lang);
         sessionStorage.removeItem('gt_synced');
-    } catch (e) {}
+    } catch (e) { }
 
     if (lang === 'en') {
         setGoogTransCookie(null);
@@ -1830,7 +1886,7 @@ function loadLanguagePreference() {
     var lang = 'en';
     try {
         lang = localStorage.getItem('preferred_language') || 'en';
-    } catch (e) {}
+    } catch (e) { }
     if (!codes[lang]) lang = 'en';
 
     var btn = document.getElementById('translatorBtn');
@@ -1848,10 +1904,10 @@ function loadLanguagePreference() {
     var alreadySynced = false;
     try {
         alreadySynced = sessionStorage.getItem('gt_synced') === lang;
-    } catch (e) {}
+    } catch (e) { }
 
     if (!hasExpected && !alreadySynced) {
-        try { sessionStorage.setItem('gt_synced', lang); } catch (e) {}
+        try { sessionStorage.setItem('gt_synced', lang); } catch (e) { }
         if (lang === 'en') {
             setGoogTransCookie(null);
         } else {

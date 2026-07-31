@@ -4,496 +4,708 @@
 
 {% block head %}
 <style>
-    /* Professional user dashboard layout */
-    .dashboard-page {
-        width: 100%;
-        max-width: 100%;
-        box-sizing: border-box;
-        padding: 20px 0 40px;
+    /* ===== Modern mobile-banking dashboard (Proficientra-style) ===== */
+    .uba-dash {
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 12px 16px 100px;
+        font-family: var(--font-main);
     }
 
-    .dashboard-wrapper {
-        display: grid;
-        grid-template-columns: 240px minmax(0, 1fr);
-        gap: 24px;
-        width: 100%;
-        max-width: 100%;
-        box-sizing: border-box;
-        align-items: start;
+    @media (min-width: 768px) {
+        .uba-dash {
+            max-width: 560px;
+            padding-top: 24px;
+        }
     }
 
-    .dashboard-main {
-        min-width: 0; /* critical: stops grid child overflowing right */
-        width: 100%;
-        max-width: 100%;
-        box-sizing: border-box;
-        overflow-x: hidden;
-    }
-
-    .sidebar {
-        background: var(--primary-white);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
-        padding: 16px 0;
-        height: fit-content;
-        position: sticky;
-        top: 90px;
-        box-sizing: border-box;
-    }
-
-    .sidebar-nav ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-    }
-
-    .sidebar-nav a {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 18px;
-        color: var(--dark-grey);
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 500;
-        transition: var(--transition);
-        border-left: 3px solid transparent;
-    }
-
-    .sidebar-nav a:hover,
-    .sidebar-nav a.active {
-        background: rgba(0, 31, 91, 0.04);
-        color: var(--primary-dark-blue);
-        border-left-color: var(--accent-gold);
-    }
-
-    .sidebar-toggle {
-        display: none;
-        width: 100%;
-        background: var(--accent-gold);
-        color: var(--primary-dark-blue);
-        border: none;
-        padding: 12px 16px;
-        border-radius: var(--radius-md);
-        font-weight: 700;
-        margin-bottom: 16px;
-        cursor: pointer;
-        text-align: center;
-        box-sizing: border-box;
-    }
-
-    .profile-photo-container {
-        display: flex;
-        align-items: center;
-        gap: 18px;
-        background: var(--primary-white);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
-        padding: 20px;
-        margin-bottom: 20px;
-        box-sizing: border-box;
-        width: 100%;
-        max-width: 100%;
-    }
-
-    .profile-photo-wrapper {
-        width: 72px;
-        height: 72px;
-        border-radius: 50%;
+    /* Greeting card */
+    .uba-hero-card {
+        background: linear-gradient(145deg, #0A1628 0%, #123A6B 55%, #0B1D36 100%);
+        border-radius: 20px;
+        padding: 22px 20px 20px;
+        color: #fff;
+        box-shadow: 0 12px 32px rgba(10, 22, 40, 0.28);
+        position: relative;
         overflow: hidden;
-        border: 3px solid var(--accent-gold);
-        flex-shrink: 0;
-        background: var(--light-grey);
+    }
+
+    .uba-hero-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at 90% 10%, rgba(201, 162, 39, 0.18), transparent 50%);
+        pointer-events: none;
+    }
+
+    .uba-hero-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 22px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .uba-user-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .uba-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #C9A227, #E8D48B);
+        color: #0A1628;
+        font-weight: 800;
+        font-size: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
-        position: relative;
+        flex-shrink: 0;
+        border: 2px solid rgba(255, 255, 255, 0.35);
     }
 
-    .profile-photo-wrapper img {
+    .uba-avatar img {
         width: 100%;
         height: 100%;
+        border-radius: 50%;
         object-fit: cover;
     }
 
-    .profile-photo-wrapper .default-avatar {
-        font-size: 32px;
-    }
-
-    .profile-photo-wrapper .photo-badge {
-        position: absolute;
-        bottom: -2px;
-        right: -2px;
-        background: var(--success);
-        color: white;
-        font-size: 11px;
-        padding: 2px 6px;
-        border-radius: 50%;
-        border: 2px solid white;
-    }
-
-    .profile-info {
-        min-width: 0;
-        flex: 1;
-    }
-
-    .profile-info h2 {
-        font-size: 22px;
-        color: var(--primary-dark-blue);
-        margin: 0 0 4px;
-        word-break: break-word;
-    }
-
-    .profile-info .sub-info,
-    .profile-info .account-info {
-        opacity: 0.75;
+    .uba-greet-label {
         font-size: 13px;
-        word-break: break-word;
-        overflow-wrap: anywhere;
-        line-height: 1.45;
-    }
-
-    .summary-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 16px;
-        margin-bottom: 24px;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .summary-card {
-        background: var(--primary-white);
-        padding: 20px;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
-        box-sizing: border-box;
-        min-width: 0;
-        border-left: 4px solid var(--accent-gold);
-    }
-
-    .summary-card h3 {
-        font-size: 12px;
-        opacity: 0.7;
-        margin: 0 0 8px;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-    }
-
-    .summary-value {
-        font-size: 24px;
-        font-weight: 800;
-        color: var(--primary-dark-blue);
-        word-break: break-word;
-    }
-
-    .section-block {
-        background: var(--primary-white);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
-        padding: 20px;
-        margin-bottom: 20px;
-        box-sizing: border-box;
-        width: 100%;
-        max-width: 100%;
-        overflow: hidden;
-    }
-
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 16px;
-        flex-wrap: wrap;
-    }
-
-    .section-header h2 {
-        font-size: 18px;
-        color: var(--primary-dark-blue);
+        opacity: 0.85;
         margin: 0;
     }
 
-    .actions-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 12px;
-        width: 100%;
+    .uba-greet-name {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 2px 0 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 160px;
     }
 
-    .action-btn {
+    .uba-time-block {
+        text-align: right;
+        flex-shrink: 0;
+    }
+
+    .uba-clock {
+        font-size: 15px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .uba-date {
+        font-size: 11px;
+        opacity: 0.75;
+        margin-top: 2px;
+    }
+
+    .uba-balance-label {
+        font-size: 13px;
+        opacity: 0.8;
+        margin-bottom: 4px;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .uba-balance-amount {
+        font-size: clamp(1.75rem, 7vw, 2.15rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin: 0 0 18px;
+        position: relative;
+        z-index: 1;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .uba-balance-toggle {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+        font-size: 16px;
+        padding: 0 4px;
+    }
+
+    .uba-status-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .uba-status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .uba-status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #22c55e;
+    }
+
+    .uba-status-dot.inactive {
+        background: #f87171;
+    }
+
+    .uba-hero-actions {
+        display: flex;
+        gap: 8px;
+        margin-left: auto;
+        flex-wrap: wrap;
+    }
+
+    .uba-hero-btn {
+        border: none;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: transform 0.15s ease;
+    }
+
+    .uba-hero-btn:active {
+        transform: scale(0.97);
+    }
+
+    .uba-hero-btn.primary {
+        background: #C9A227;
+        color: #0A1628;
+    }
+
+    .uba-hero-btn.secondary {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    /* Quick actions */
+    .uba-section {
+        margin-top: 22px;
+    }
+
+    .uba-section-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--primary-dark-blue, #0A1628);
+        margin: 0 0 4px;
+    }
+
+    .uba-section-sub {
+        font-size: 13px;
+        color: #64748B;
+        margin: 0 0 14px;
+    }
+
+    .uba-actions {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+    }
+
+    @media (max-width: 380px) {
+        .uba-actions {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .uba-action {
+        background: #fff;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        padding: 16px 8px;
+        text-align: center;
+        text-decoration: none;
+        color: #1E293B;
+        font-size: 12px;
+        font-weight: 600;
+        box-shadow: 0 1px 3px rgba(10, 22, 40, 0.06);
+        transition: all 0.2s ease;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 8px;
-        padding: 18px 12px;
-        background: var(--light-grey);
-        border-radius: var(--radius-md);
+    }
+
+    .uba-action:hover {
+        border-color: #C9A227;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(10, 22, 40, 0.1);
+        color: #0A1628;
+    }
+
+    .uba-action-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(18, 58, 107, 0.08), rgba(201, 162, 39, 0.15));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    /* Recent transactions */
+    .uba-tx-list {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #E2E8F0;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(10, 22, 40, 0.06);
+    }
+
+    .uba-tx-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        border-bottom: 1px solid #F1F5F9;
+    }
+
+    .uba-tx-item:last-child {
+        border-bottom: none;
+    }
+
+    .uba-tx-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: #F1F5F9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .uba-tx-meta {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .uba-tx-meta strong {
+        display: block;
+        font-size: 13px;
+        color: #0A1628;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .uba-tx-meta span {
+        font-size: 11px;
+        color: #94A3B8;
+    }
+
+    .uba-tx-amt {
+        font-weight: 700;
+        font-size: 13px;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .uba-tx-amt.out {
+        color: #DC2626;
+    }
+
+    .uba-tx-amt.in {
+        color: #059669;
+    }
+
+    .uba-badge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 999px;
+        text-transform: uppercase;
+    }
+
+    .uba-badge.pending {
+        background: #FEF3C7;
+        color: #B45309;
+    }
+
+    .uba-badge.approved {
+        background: #D1FAE5;
+        color: #047857;
+    }
+
+    .uba-badge.rejected {
+        background: #FEE2E2;
+        color: #B91C1C;
+    }
+
+    .uba-empty {
+        text-align: center;
+        padding: 28px 16px;
+        color: #94A3B8;
+        font-size: 13px;
+    }
+
+    /* Account info strip */
+    .uba-info-strip {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 16px;
+    }
+
+    .uba-info-chip {
+        background: #fff;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 12px;
+        font-size: 12px;
+    }
+
+    .uba-info-chip label {
+        display: block;
+        color: #94A3B8;
+        font-size: 11px;
+        margin-bottom: 4px;
+    }
+
+    .uba-info-chip strong {
+        color: #0A1628;
+        word-break: break-all;
+    }
+
+    /* Bottom nav */
+    .uba-bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fff;
+        border-top: 1px solid #E2E8F0;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+        z-index: 900;
+        box-shadow: 0 -4px 20px rgba(10, 22, 40, 0.08);
+    }
+
+    .uba-bottom-nav a {
+        flex: 1;
+        text-align: center;
         text-decoration: none;
-        color: var(--dark-grey);
+        color: #94A3B8;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 6px 4px;
+        border-radius: 10px;
+        transition: color 0.15s;
+    }
+
+    .uba-bottom-nav a.active,
+    .uba-bottom-nav a:hover {
+        color: #0A1628;
+    }
+
+    .uba-bottom-nav a .nav-ic {
+        display: block;
+        font-size: 20px;
+        margin-bottom: 2px;
+        line-height: 1;
+    }
+
+    .uba-nav-center {
+        position: relative;
+        top: -18px;
+    }
+
+    .uba-nav-center .nav-fab {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #123A6B, #0A1628);
+        color: #C9A227;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        margin: 0 auto 2px;
+        box-shadow: 0 6px 20px rgba(10, 22, 40, 0.35);
+        border: 3px solid #fff;
+    }
+
+    /* Hide default site footer excess on dash for mobile feel */
+    body:has(.uba-dash) .site-footer {
+        display: none;
+    }
+
+    body:has(.uba-dash) .main-content {
+        padding-bottom: 0;
+    }
+
+    .uba-link-all {
         font-size: 13px;
         font-weight: 600;
-        border: 1px solid transparent;
-        transition: var(--transition);
-        box-sizing: border-box;
-        text-align: center;
+        color: #123A6B;
+        text-decoration: none;
     }
 
-    .action-btn:hover {
-        border-color: var(--accent-gold);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-sm);
-        color: var(--primary-dark-blue);
-    }
-
-    .table-responsive {
-        width: 100%;
-        max-width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .dashboard-main table {
-        width: 100%;
-        min-width: 480px;
-        border-collapse: collapse;
-        font-size: 13px;
-    }
-
-    .dashboard-main th,
-    .dashboard-main td {
-        padding: 10px 8px;
-        text-align: left;
-        border-bottom: 1px solid var(--border-light);
-        word-break: break-word;
-    }
-
-    .dashboard-main th {
-        font-size: 11px;
-        text-transform: uppercase;
-        color: var(--primary-dark-blue);
-        opacity: 0.85;
-    }
-
-    /* Tablet */
-    @media (max-width: 991px) {
-        .dashboard-wrapper {
-            grid-template-columns: 1fr;
-            gap: 16px;
-        }
-
-        .sidebar {
-            display: none;
-            position: static;
-            width: 100%;
-            margin-bottom: 8px;
-        }
-
-        .sidebar.open {
-            display: block;
-        }
-
-        .sidebar-toggle {
-            display: block;
-        }
-
-        .summary-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .profile-photo-container {
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .profile-info {
-            width: 100%;
-        }
-    }
-
-    /* Phone */
-    @media (max-width: 600px) {
-        .dashboard-page {
-            padding: 12px 0 28px;
-        }
-
-        .summary-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .summary-value {
-            font-size: 22px;
-        }
-
-        .section-block {
-            padding: 16px;
-        }
-
-        .actions-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .profile-photo-wrapper {
-            width: 64px;
-            height: 64px;
-        }
-
-        .profile-info h2 {
-            font-size: 18px;
-        }
+    .uba-section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container dashboard-page">
-    <div class="dashboard-wrapper">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebarMenu">
-            <nav class="sidebar-nav">
-                <ul>
-                    <li><a href="{{ url_for('user.dashboard') }}" class="active">📊 Overview</a></li>
-                    <li><a href="{{ url_for('user.payment') }}">💸 Payments</a></li>
-                    <li><a href="{{ url_for('user.savings') }}">💰 Savings</a></li>
-                    <li><a href="{{ url_for('user.cards') }}">💳 Cards</a></li>
-                    <li><a href="{{ url_for('user.transaction_history') }}">📊 History</a></li>
-                    <li><a href="{{ url_for('user.settings') }}">⚙️ Settings</a></li>
-                </ul>
-            </nav>
-        </aside>
+{% set pending_n = transactions|selectattr('status', 'equalto', 'pending')|list|length %}
+{% set initials = (current_user.username[0]|upper) if current_user.username else 'U' %}
 
-        <!-- Main Content -->
-        <main class="dashboard-main">
-            <button type="button" class="sidebar-toggle" onclick="document.getElementById('sidebarMenu').classList.toggle('open')">☰ Menu</button>
+<div class="uba-dash">
 
-            <!-- Profile Photo Section -->
-            <div class="profile-photo-container">
-                <div class="profile-photo-wrapper">
+    <!-- Hero balance card -->
+    <div class="uba-hero-card">
+        <div class="uba-hero-top">
+            <div class="uba-user-row">
+                <div class="uba-avatar">
                     {% if current_user.profile_photo %}
-                    <img src="{{ url_for('static', filename=current_user.profile_photo) }}" alt="Profile Photo"
-                        onerror="this.style.display='none'; this.parentElement.querySelector('.default-avatar').style.display='flex';">
-                    <span class="photo-badge">✓</span>
+                    <img src="{{ url_for('static', filename=current_user.profile_photo) if not current_user.profile_photo.startswith('http') else current_user.profile_photo }}"
+                        alt="">
+                    {% else %}
+                    {{ initials }}
                     {% endif %}
-                    <span class="default-avatar"
-                        style="{% if current_user.profile_photo %}display:none;{% endif %}">👤</span>
                 </div>
-                <div class="profile-info">
-                    <h2>Welcome, {{ current_user.username }}</h2>
-                    <div class="sub-info">{{ current_user.get_full_name() or current_user.username }}</div>
-                    <div class="account-info">Account: {{ current_user.account_number or 'N/A' }} • Sort Code: {{
-                        current_user.sort_code or 'N/A' }}</div>
-                    <div class="account-info" style="margin-top: 4px; color: var(--success);">
-                        ✅ {{ 'Verified' if current_user.is_verified else 'Pending Verification' }}
-                    </div>
+                <div>
+                    <p class="uba-greet-label" id="ubaGreeting">Good day</p>
+                    <p class="uba-greet-name">{{ current_user.first_name or current_user.username }}</p>
                 </div>
             </div>
-
-            <p style="opacity:0.7; margin-bottom: 20px;">Account overview as of <span id="currentDate"></span></p>
-
-            <div class="summary-grid">
-                <div class="summary-card">
-                    <h3>Total Balance</h3>
-                    <div class="summary-value" data-balance>${{ "%.2f"|format(current_user.balance) }}</div>
-                </div>
-                <div class="summary-card">
-                    <h3>Pending Transactions</h3>
-                    <div class="summary-value">{{ transactions|selectattr('status', 'equalto', 'pending')|list|length }}
-                    </div>
-                </div>
-                <div class="summary-card">
-                    <h3>Total Transactions</h3>
-                    <div class="summary-value">{{ transactions|length }}</div>
-                </div>
+            <div class="uba-time-block">
+                <div class="uba-clock" id="ubaClock">--:--</div>
+                <div class="uba-date" id="ubaDate"></div>
             </div>
+        </div>
 
-            <div class="section-block">
-                <div class="section-header">
-                    <h2>Quick Actions</h2>
-                </div>
-                <div class="actions-grid">
-                    <button class="action-btn"
-                        onclick="showToast('To receive funds, share your username: {{ current_user.username }}', 'info')">
-                        <span class="action-icon">📥</span> Receive
-                    </button>
-                    <a href="{{ url_for('user.savings') }}" class="action-btn">
-                        <span class="action-icon">💰</span> Save
-                    </a>
-                    <a href="{{ url_for('user.transaction_history') }}" class="action-btn">
-                        <span class="action-icon">📊</span> History
-                    </a>
-                </div>
-            </div>
+        <div class="uba-balance-label">
+            <span>Total Balance</span>
+            <button type="button" class="uba-balance-toggle" id="toggleBal" aria-label="Hide balance">👁</button>
+        </div>
+        <p class="uba-balance-amount" id="balanceDisplay" data-balance data-format="currency">
+            ${{ "%.2f"|format(current_user.balance) }}
+        </p>
 
-            <!-- Recent Transactions -->
-            <div class="section-block">
-                <div class="section-header">
-                    <h2>Recent Transactions</h2>
-                    <a href="{{ url_for('user.transaction_history') }}"
-                        style="color:var(--accent-gold); font-weight:600;">View All →</a>
-                </div>
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>From</th>
-                                <th>To</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if transactions %}
-                            {% for t in transactions %}
-                            <tr>
-                                <td>{{ t.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
-                                <td>{{ t.sender.username }}</td>
-                                <td>{{ t.receiver.username if t.receiver else 'International' }}</td>
-                                <td
-                                    class="{% if t.sender_id == current_user.id %}amount-out{% else %}amount-in{% endif %}">
-                                    {% if t.sender_id == current_user.id %}-{% endif %}${{ "%.2f"|format(t.amount) }}
-                                </td>
-                                <td><span class="status-badge status-{{ t.status }}">{{ t.status }}</span></td>
-                            </tr>
-                            {% endfor %}
-                            {% else %}
-                            <tr>
-                                <td colspan="5" class="text-center" style="padding:30px; opacity:0.6;">No transactions
-                                    yet</td>
-                            </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
+        <div class="uba-status-row">
+            <div class="uba-status-pill">
+                <span class="uba-status-dot {% if not current_user.is_active %}inactive{% endif %}"></span>
+                {% if current_user.is_active %}Active{% else %}Inactive{% endif %}
+                {% if current_user.is_verified %} · Verified{% endif %}
             </div>
-        </main>
+            <div class="uba-hero-actions">
+                <a href="{{ url_for('user.transaction_history') }}" class="uba-hero-btn secondary">📊 Transactions</a>
+                <a href="{{ url_for('user.payment') }}" class="uba-hero-btn primary">💸 Transfer</a>
+            </div>
+        </div>
     </div>
+
+    <!-- Account chips -->
+    <div class="uba-info-strip">
+        <div class="uba-info-chip">
+            <label>Account number</label>
+            <strong>{{ current_user.account_number or 'Pending' }}</strong>
+        </div>
+        <div class="uba-info-chip">
+            <label>Pending transfers</label>
+            <strong>{{ pending_n }}</strong>
+        </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="uba-section">
+        <h2 class="uba-section-title">What would you like to do today?</h2>
+        <p class="uba-section-sub">Choose from popular actions below</p>
+        <div class="uba-actions">
+            <a class="uba-action" href="{{ url_for('user.payment') }}">
+                <span class="uba-action-icon">💸</span>
+                Send Money
+            </a>
+            <a class="uba-action" href="{{ url_for('user.payment') }}#international">
+                <span class="uba-action-icon">🌍</span>
+                Wire Transfer
+            </a>
+            <a class="uba-action" href="{{ url_for('user.transaction_history') }}">
+                <span class="uba-action-icon">📊</span>
+                History
+            </a>
+            <a class="uba-action" href="{{ url_for('user.savings') }}">
+                <span class="uba-action-icon">💰</span>
+                Savings
+            </a>
+            <a class="uba-action" href="{{ url_for('user.cards') }}">
+                <span class="uba-action-icon">💳</span>
+                Cards
+            </a>
+            <a class="uba-action" href="{{ url_for('user.settings') }}">
+                <span class="uba-action-icon">⚙️</span>
+                Settings
+            </a>
+            <a class="uba-action" href="javascript:void(0)" onclick="openLiveChat()">
+                <span class="uba-action-icon">💬</span>
+                Live Chat
+            </a>
+            <a class="uba-action" href="{{ url_for('main.help') }}">
+                <span class="uba-action-icon">❓</span>
+                Help
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent transactions -->
+    <div class="uba-section">
+        <div class="uba-section-head">
+            <h2 class="uba-section-title" style="margin:0">Recent activity</h2>
+            <a class="uba-link-all" href="{{ url_for('user.transaction_history') }}">View all →</a>
+        </div>
+        <div class="uba-tx-list">
+            {% if transactions %}
+            {% for t in transactions[:6] %}
+            <div class="uba-tx-item">
+                <div class="uba-tx-icon">
+                    {% if t.transaction_type == 'international' %}🌍{% elif t.sender_id == current_user.id %}↑{% else
+                    %}↓{% endif %}
+                </div>
+                <div class="uba-tx-meta">
+                    <strong>
+                        {% if t.transaction_type == 'international' %}
+                        International wire
+                        {% elif t.sender_id == current_user.id %}
+                        To {{ t.receiver.username if t.receiver else '—' }}
+                        {% else %}
+                        From {{ t.sender.username if t.sender else 'System' }}
+                        {% endif %}
+                    </strong>
+                    <span>
+                        {{ t.created_at.strftime('%d %b %Y · %H:%M') if t.created_at else '' }}
+                        · <span class="uba-badge {{ t.status }}">{{ t.status }}</span>
+                    </span>
+                </div>
+                <div class="uba-tx-amt {% if t.sender_id == current_user.id %}out{% else %}in{% endif %}">
+                    {% if t.sender_id == current_user.id %}-{% else %}+{% endif %}${{ "%.2f"|format(t.amount) }}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="uba-empty">
+                No transactions yet.<br>
+                <a href="{{ url_for('user.payment') }}" class="uba-link-all">Make your first transfer →</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
 </div>
 
+<!-- Bottom navigation -->
+<nav class="uba-bottom-nav" aria-label="Main">
+    <a href="{{ url_for('user.dashboard') }}" class="active">
+        <span class="nav-ic">🏠</span>Home
+    </a>
+    <a href="{{ url_for('user.transaction_history') }}">
+        <span class="nav-ic">📊</span>Stats
+    </a>
+    <a href="{{ url_for('user.payment') }}" class="uba-nav-center">
+        <span class="nav-fab">⊞</span>
+        Transfer
+    </a>
+    <a href="{{ url_for('user.cards') }}">
+        <span class="nav-ic">💳</span>Cards
+    </a>
+    <a href="{{ url_for('user.settings') }}">
+        <span class="nav-ic">👤</span>Profile
+    </a>
+</nav>
+{% endblock %}
+
+{% block scripts %}
 <script>
-    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
-        day: 'numeric', month: 'long', year: 'numeric'
-    });
+    (function () {
+        // United States time (Eastern) + American 12-hour format
+        var TZ = 'America/New_York';
+        var LOCALE = 'en-US';
 
-    async function updateBalance() {
-        try {
-            const response = await fetch('{{ url_for("api.get_balance") }}');
-            const data = await response.json();
-            if (data.balance !== undefined) {
-                document.querySelector('[data-balance]').textContent = '$' + data.balance.toFixed(2);
+        function tick() {
+            var now = new Date();
+            var el = document.getElementById('ubaClock');
+            var de = document.getElementById('ubaDate');
+            var gr = document.getElementById('ubaGreeting');
+
+            if (el) {
+                el.textContent = now.toLocaleTimeString(LOCALE, {
+                    timeZone: TZ,
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                });
             }
-        } catch (e) { console.error('Failed to update balance:', e); }
-    }
-    setInterval(updateBalance, 30000);
-
-    document.addEventListener('click', function (e) {
-        const sidebar = document.getElementById('sidebarMenu');
-        const toggle = document.querySelector('.sidebar-toggle');
-        if (window.innerWidth <= 991) {
-            if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggle.contains(e.target)) {
-                sidebar.classList.remove('open');
+            if (de) {
+                de.textContent = now.toLocaleDateString(LOCALE, {
+                    timeZone: TZ,
+                    weekday: 'long',
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+            }
+            if (gr) {
+                // Greeting based on US Eastern hour
+                var hourStr = now.toLocaleString(LOCALE, { timeZone: TZ, hour: 'numeric', hour12: false });
+                var h = parseInt(hourStr, 10);
+                if (isNaN(h)) h = now.getHours();
+                gr.textContent = h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening';
             }
         }
-    });
+        tick();
+        setInterval(tick, 1000);
+
+        var hidden = false;
+        var bal = document.getElementById('balanceDisplay');
+        var btn = document.getElementById('toggleBal');
+        var raw = bal ? bal.textContent : '';
+        if (btn && bal) {
+            btn.addEventListener('click', function () {
+                hidden = !hidden;
+                bal.textContent = hidden ? '••••••••' : raw;
+                btn.textContent = hidden ? '🙈' : '👁';
+            });
+        }
+    })();
 </script>
 {% endblock %}

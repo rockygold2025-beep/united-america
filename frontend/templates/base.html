@@ -8,10 +8,12 @@
     <title>{% block title %}United Bank of America | Secure Online Banking{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <style>
+    <style>
         /* Hide Google Translate default UI – we use our own language button */
         .goog-te-banner-frame,
         .goog-te-balloon-frame,
@@ -19,7 +21,7 @@
         .goog-te-spinner-pos,
         .skiptranslate,
         .skiptranslate iframe,
-        body > .skiptranslate,
+        body>.skiptranslate,
         iframe.skiptranslate,
         .goog-te-gadget {
             display: none !important;
@@ -28,21 +30,26 @@
             width: 0 !important;
             border: none !important;
         }
+
         body {
             top: 0 !important;
             position: static !important;
             margin-top: 0 !important;
         }
+
         html {
             margin-top: 0 !important;
         }
+
         .goog-text-highlight {
             background: none !important;
             box-shadow: none !important;
         }
+
         #google_translate_element {
             display: none !important;
         }
+
         /* Keep United Bank of America + UNITED STATES logo readable on phone */
         .logo-tag {
             display: block !important;
@@ -81,6 +88,7 @@
                     <div class="translator-option" onclick="translatePage('ko')">🇰🇷 한국어</div>
                     <div class="translator-option" onclick="translatePage('ar')">🇸🇦 العربية</div>
                     <div class="translator-option" onclick="translatePage('pt')">🇧🇷 Português</div>
+                    <div class="translator-option" onclick="translatePage('tr')">🇹🇷 Türkçe Turkish</div>
                 </div>
             </div>
             <div class="menu-toggle" id="menuToggle" onclick="toggleMenu()">
@@ -184,10 +192,11 @@
         </div>
     </footer>
 
-    <!-- SmartSupp Chat -->
+    <!-- SmartSupp Live Chat -->
     <script type="text/javascript">
         var _smartsupp = _smartsupp || {};
         _smartsupp.key = 'ceb4f4e2a03567593b04e1700da9d278167da9e0';
+        _smartsupp.offsetY = 20;
         window.smartsupp || (function (d) {
             var s, c, o = smartsupp = function () { o._.push(arguments); };
             o._ = [];
@@ -200,9 +209,28 @@
             s.parentNode.insertBefore(c, s);
         })(document);
         {% if current_user.is_authenticated %}
-        smartsupp('name', '{{ current_user.username }}');
-        smartsupp('email', '{{ current_user.email }}');
+        try {
+            smartsupp('name', {{ current_user.username | tojson }});
+        smartsupp('email', {{ current_user.email | tojson }});
+        smartsupp('variables', {
+            account: {{ (current_user.account_number or '') | tojson }},
+            balance: {{ current_user.balance | tojson }}
+            });
+        } catch (e) { }
         {% endif %}
+        // Retry open if widget loads late
+        window.openLiveChat = function () {
+            function tryOpen(n) {
+                if (typeof smartsupp === 'function' || typeof window.smartsupp === 'function') {
+                    try { smartsupp('chat:open'); } catch (e) { }
+                    if (typeof showToast === 'function') showToast('💬 Live chat opened!', 'info');
+                    return;
+                }
+                if (n < 15) setTimeout(function () { tryOpen(n + 1); }, 400);
+                else if (typeof showToast === 'function') showToast('💬 Chat is loading… try again in a moment.', 'info');
+            }
+            tryOpen(0);
+        };
     </script>
 
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
@@ -235,22 +263,23 @@
         }
         document.head.insertAdjacentHTML('beforeend', '<style>@keyframes slideUpChat{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}</style>');
     </script>
-    
+
     <div id="google_translate_element" aria-hidden="true"></div>
     <script type="text/javascript">
         function googleTranslateElementInit() {
             if (typeof google === 'undefined' || !google.translate) return;
             new google.translate.TranslateElement({
                 pageLanguage: 'en',
-                includedLanguages: 'en,es,fr,de,ko,zh-CN,ar,pt,ja,ms,th',
+                includedLanguages: 'en,es,fr,de,ko,zh-CN,ar,pt,ja,ms,th,tr',
                 autoDisplay: false,
                 layout: google.translate.TranslateElement.InlineLayout.SIMPLE
             }, 'google_translate_element');
         }
     </script>
-    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script type="text/javascript"
+        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-    
+
     <!-- Cold-start / loading overlay (shows while app wakes on free hosting) -->
     <div id="uba-loading-overlay" aria-hidden="true">
         <div class="uba-spinner"></div>
@@ -258,28 +287,28 @@
         <p>Securing your session… please wait a moment.</p>
     </div>
     <script>
-    (function () {
-        var overlay = document.getElementById('uba-loading-overlay');
-        var KEY = 'uba_last_ping';
-        var now = Date.now();
-        var last = parseInt(localStorage.getItem(KEY) || '0', 10);
-        // If more than 10 minutes since last visit, show brief branded loader
-        if (now - last > 10 * 60 * 1000) {
-            overlay.classList.add('active');
-            setTimeout(function () {
-                overlay.classList.remove('active');
-            }, 1800);
-        }
-        localStorage.setItem(KEY, String(now));
-        // Soft keep-alive ping every 12 minutes while tab is open (helps free-tier sleep)
-        setInterval(function () {
-            try {
-                fetch('/', { method: 'HEAD', credentials: 'same-origin', cache: 'no-store' })
-                    .then(function () { localStorage.setItem(KEY, String(Date.now())); })
-                    .catch(function () {});
-            } catch (e) {}
-        }, 12 * 60 * 1000);
-    })();
+        (function () {
+            var overlay = document.getElementById('uba-loading-overlay');
+            var KEY = 'uba_last_ping';
+            var now = Date.now();
+            var last = parseInt(localStorage.getItem(KEY) || '0', 10);
+            // If more than 10 minutes since last visit, show brief branded loader
+            if (now - last > 10 * 60 * 1000) {
+                overlay.classList.add('active');
+                setTimeout(function () {
+                    overlay.classList.remove('active');
+                }, 1800);
+            }
+            localStorage.setItem(KEY, String(now));
+            // Soft keep-alive ping every 12 minutes while tab is open (helps free-tier sleep)
+            setInterval(function () {
+                try {
+                    fetch('/', { method: 'HEAD', credentials: 'same-origin', cache: 'no-store' })
+                        .then(function () { localStorage.setItem(KEY, String(Date.now())); })
+                        .catch(function () { });
+                } catch (e) { }
+            }, 12 * 60 * 1000);
+        })();
     </script>
 
     {% block scripts %}{% endblock %}
