@@ -50,9 +50,15 @@
             display: none !important;
         }
 
-        /* Keep United Bank of America + UNITED STATES logo readable on phone */
         .logo-tag {
             display: block !important;
+        }
+
+        /* Keep Smartsupp above bottom nav / cookie bar */
+        #chat-application,
+        .smartsupp-widget-container,
+        [id^="smartsupp"] {
+            z-index: 2147483000 !important;
         }
     </style>
     {% block head %}{% endblock %}
@@ -192,44 +198,57 @@
         </div>
     </footer>
 
-    <!-- SmartSupp Live Chat -->
-    <!-- Smartsupp Live Chat script -->
+    <!-- Smartsupp Live Chat — ALL code must stay inside this one script tag -->
     <script type="text/javascript">
         var _smartsupp = _smartsupp || {};
         _smartsupp.key = 'ceb4f4e2a03567593b04e1700da9d278167da9e0';
+        _smartsupp.offsetY = 24;
         window.smartsupp || (function (d) {
-            var s, c, o = smartsupp = function () { o._.push(arguments) }; o._ = [];
-            s = d.getElementsByTagName('script')[0]; c = d.createElement('script');
-            c.type = 'text/javascript'; c.charset = 'utf-8'; c.async = true;
-            c.src = 'https://www.smartsuppchat.com/loader.js?'; s.parentNode.insertBefore(c, s);
+            var s, c, o = smartsupp = function () { o._.push(arguments); };
+            o._ = [];
+            s = d.getElementsByTagName('script')[0];
+            c = d.createElement('script');
+            c.type = 'text/javascript';
+            c.charset = 'utf-8';
+            c.async = true;
+            c.src = 'https://www.smartsuppchat.com/loader.js';
+            s.parentNode.insertBefore(c, s);
         })(document);
-    </script>
-    {% if current_user.is_authenticated %}
-    try {
-    smartsupp('name', {{ current_user.username | tojson }});
-    smartsupp('email', {{ current_user.email | tojson }});
-    smartsupp('variables', {
-    account: {{ (current_user.account_number or '') | tojson }},
-    balance: {{ current_user.balance | tojson }}
-    });
-    } catch (e) { }
-    {% endif %}
-    // Retry open if widget loads late
-    window.openLiveChat = function () {
-    function tryOpen(n) {
-    if (typeof smartsupp === 'function' || typeof window.smartsupp === 'function') {
-    try { smartsupp('chat:open'); } catch (e) { }
-    if (typeof showToast === 'function') showToast('💬 Live chat opened!', 'info');
-    return;
-    }
-    if (n < 15) setTimeout(function () { tryOpen(n + 1); }, 400); else if (typeof showToast==='function' ) showToast('💬
-        Chat is loading… try again in a moment.', 'info' ); } tryOpen(0); }; </script>
 
-        <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-        <script>
-            var csrfToken = "{{ csrf_token() if csrf_token else '' }}";
-            function getCsrfToken() { return csrfToken; }
+        {% if current_user.is_authenticated %}
+        try {
+            smartsupp('name', {{ current_user.username | tojson }});
+        smartsupp('email', {{ current_user.email | tojson }});
+        smartsupp('variables', {
+            account: {{ (current_user.account_number or '') | tojson }},
+            balance: {{ current_user.balance | tojson }}
+            });
+        } catch (e) { }
+        {% endif %}
+
+        window.openLiveChat = function () {
+            function tryOpen(n) {
+                if (typeof smartsupp === 'function') {
+                    try { smartsupp('chat:open'); } catch (err) { }
+                    if (typeof showToast === 'function') showToast('💬 Live chat opened!', 'info');
+                    return;
+                }
+                if (n < 20) {
+                    setTimeout(function () { tryOpen(n + 1); }, 300);
+                } else if (typeof showToast === 'function') {
+                    showToast('💬 Chat is loading… try again in a moment.', 'info');
+                }
+            }
+            tryOpen(0);
+        };
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        var csrfToken = "{{ csrf_token() if csrf_token else '' }}";
+        function getCsrfToken() { return csrfToken; }
+        if (window.jQuery) {
             $.ajaxSetup({
                 beforeSend: function (xhr, settings) {
                     if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
@@ -237,73 +256,196 @@
                     }
                 }
             });
-            function openLiveChat() {
-                if (typeof smartsupp !== 'undefined') {
-                    smartsupp('chat:open');
-                    showToast('💬 Live chat opened!', 'info');
-                } else {
-                    window.location.href = "{{ url_for('main.contact') }}";
-                }
-            }
-            function showToast(message, type) {
-                var toast = document.createElement('div');
-                var bgColor = type === 'success' ? '#0a7f42' : type === 'error' ? '#dc2626' : '#3b82f6';
-                toast.style.cssText = 'position:fixed;bottom:100px;right:30px;padding:15px 25px;background:' + bgColor + ';color:white;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);animation:slideUpChat 0.3s ease;max-width:400px;';
-                toast.textContent = message;
-                document.body.appendChild(toast);
-                setTimeout(function () { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(function () { toast.remove(); }, 300); }, 3000);
-            }
-            document.head.insertAdjacentHTML('beforeend', '<style>@keyframes slideUpChat{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}</style>');
-        </script>
+        }
+        function showToast(message, type) {
+            var toast = document.createElement('div');
+            var bgColor = type === 'success' ? '#0a7f42' : type === 'error' ? '#dc2626' : '#3b82f6';
+            toast.style.cssText = 'position:fixed;bottom:100px;right:30px;padding:15px 25px;background:' + bgColor + ';color:white;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-width:400px;';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(function () {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(function () { toast.remove(); }, 300);
+            }, 3000);
+        }
+    </script>
 
-        <div id="google_translate_element" aria-hidden="true"></div>
-        <script type="text/javascript">
-            function googleTranslateElementInit() {
-                if (typeof google === 'undefined' || !google.translate) return;
-                new google.translate.TranslateElement({
-                    pageLanguage: 'en',
-                    includedLanguages: 'en,es,fr,de,ko,zh-CN,ar,pt,ja,ms,th,tr',
-                    autoDisplay: false,
-                    layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-                }, 'google_translate_element');
+    <div id="google_translate_element" aria-hidden="true"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            if (typeof google === 'undefined' || !google.translate) return;
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,es,fr,de,ko,zh-CN,ar,pt,ja,ms,th,tr',
+                autoDisplay: false,
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript"
+        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <!-- Cold-start / loading overlay -->
+    <div id="uba-loading-overlay" aria-hidden="true">
+        <div class="uba-spinner"></div>
+        <h2>United Bank of America</h2>
+        <p>Securing your session… please wait a moment.</p>
+    </div>
+    <script>
+        (function () {
+            var overlay = document.getElementById('uba-loading-overlay');
+            if (!overlay) return;
+            var KEY = 'uba_last_ping';
+            var now = Date.now();
+            var last = parseInt(localStorage.getItem(KEY) || '0', 10);
+            if (now - last > 10 * 60 * 1000) {
+                overlay.classList.add('active');
+                setTimeout(function () { overlay.classList.remove('active'); }, 1800);
             }
-        </script>
-        <script type="text/javascript"
-            src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+            localStorage.setItem(KEY, String(now));
+            setInterval(function () {
+                try {
+                    fetch('/', { method: 'HEAD', credentials: 'same-origin', cache: 'no-store' })
+                        .then(function () { localStorage.setItem(KEY, String(Date.now())); })
+                        .catch(function () { });
+                } catch (e) { }
+            }, 12 * 60 * 1000);
+        })();
+    </script>
 
-
-        <!-- Cold-start / loading overlay (shows while app wakes on free hosting) -->
-        <div id="uba-loading-overlay" aria-hidden="true">
-            <div class="uba-spinner"></div>
-            <h2>United Bank of America</h2>
-            <p>Securing your session… please wait a moment.</p>
+    <!-- Cookie consent -->
+    <div id="ubaCookieBanner" class="uba-cookie-banner" role="dialog" aria-label="Cookie consent" hidden>
+        <div class="uba-cookie-inner">
+            <div class="uba-cookie-text">
+                <strong>🍪 We value your privacy</strong>
+                <p>
+                    United Bank of America uses cookies to keep you signed in securely, remember your language,
+                    and improve our online banking experience. By clicking <em>Accept all</em>, you agree to our use of
+                    cookies.
+                    See our <a href="{{ url_for('main.privacy') }}">Privacy Policy</a>.
+                </p>
+            </div>
+            <div class="uba-cookie-actions">
+                <button type="button" class="uba-cookie-btn secondary" id="ubaCookieReject">Reject
+                    non-essential</button>
+                <button type="button" class="uba-cookie-btn primary" id="ubaCookieAccept">Accept all</button>
+            </div>
         </div>
-        <script>
-            (function () {
-                var overlay = document.getElementById('uba-loading-overlay');
-                var KEY = 'uba_last_ping';
-                var now = Date.now();
-                var last = parseInt(localStorage.getItem(KEY) || '0', 10);
-                // If more than 10 minutes since last visit, show brief branded loader
-                if (now - last > 10 * 60 * 1000) {
-                    overlay.classList.add('active');
-                    setTimeout(function () {
-                        overlay.classList.remove('active');
-                    }, 1800);
-                }
-                localStorage.setItem(KEY, String(now));
-                // Soft keep-alive ping every 12 minutes while tab is open (helps free-tier sleep)
-                setInterval(function () {
-                    try {
-                        fetch('/', { method: 'HEAD', credentials: 'same-origin', cache: 'no-store' })
-                            .then(function () { localStorage.setItem(KEY, String(Date.now())); })
-                            .catch(function () { });
-                    } catch (e) { }
-                }, 12 * 60 * 1000);
-            })();
-        </script>
+    </div>
+    <style>
+        .uba-cookie-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100000;
+            background: #0A1628;
+            color: #fff;
+            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
+            padding: 16px 20px;
+            padding-bottom: calc(16px + env(safe-area-inset-bottom));
+        }
 
-        {% block scripts %}{% endblock %}
+        .uba-cookie-banner[hidden] {
+            display: none !important;
+        }
+
+        .uba-cookie-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px 24px;
+            justify-content: space-between;
+        }
+
+        .uba-cookie-text {
+            flex: 1 1 280px;
+            min-width: 0;
+        }
+
+        .uba-cookie-text strong {
+            display: block;
+            font-size: 15px;
+            margin-bottom: 6px;
+            color: #C9A227;
+        }
+
+        .uba-cookie-text p {
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.88);
+        }
+
+        .uba-cookie-text a {
+            color: #E8D48B;
+            text-decoration: underline;
+        }
+
+        .uba-cookie-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .uba-cookie-btn {
+            border: none;
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .uba-cookie-btn.primary {
+            background: linear-gradient(135deg, #D4AF37, #C9A227);
+            color: #0A1628;
+        }
+
+        .uba-cookie-btn.secondary {
+            background: transparent;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+        }
+
+        body:has(.uba-bottom-nav) .uba-cookie-banner {
+            bottom: 64px;
+        }
+
+        @media (max-width: 575px) {
+            .uba-cookie-actions {
+                width: 100%;
+            }
+
+            .uba-cookie-btn {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    </style>
+    <script>
+        (function () {
+            var KEY = 'uba_cookie_consent';
+            var banner = document.getElementById('ubaCookieBanner');
+            if (!banner) return;
+            try { if (localStorage.getItem(KEY)) return; } catch (e) { }
+            banner.hidden = false;
+            function save(val) {
+                try { localStorage.setItem(KEY, val); } catch (e) { }
+                banner.hidden = true;
+            }
+            var a = document.getElementById('ubaCookieAccept');
+            var r = document.getElementById('ubaCookieReject');
+            if (a) a.addEventListener('click', function () { save('accepted'); });
+            if (r) r.addEventListener('click', function () { save('rejected'); });
+        })();
+    </script>
+
+    {% block scripts %}{% endblock %}
 </body>
 
 </html>
