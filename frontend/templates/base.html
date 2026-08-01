@@ -198,49 +198,43 @@
         </div>
     </footer>
 
-    <!-- Smartsupp Live Chat — ALL code must stay inside this one script tag -->
+    <!-- Smartsupp Live Chat Widget - CORRECTED VERSION -->
     <script type="text/javascript">
-        var _smartsupp = _smartsupp || {};
-        _smartsupp.key = 'ceb4f4e2a03567593b04e1700da9d278167da9e0';
-        _smartsupp.offsetY = 24;
-        window.smartsupp || (function (d) {
-            var s, c, o = smartsupp = function () { o._.push(arguments); };
-            o._ = [];
-            s = d.getElementsByTagName('script')[0];
-            c = d.createElement('script');
-            c.type = 'text/javascript';
-            c.charset = 'utf-8';
-            c.async = true;
-            c.src = 'https://www.smartsuppchat.com/loader.js';
-            s.parentNode.insertBefore(c, s);
-        })(document);
+        (function () {
+            window._smartsupp = window._smartsupp || {};
+            window._smartsupp.key = 'ceb4f4e2a03567593b04e1700da9d278167da9e0';
 
-        {% if current_user.is_authenticated %}
-        try {
-            smartsupp('name', {{ current_user.username | tojson }});
-        smartsupp('email', {{ current_user.email | tojson }});
-        smartsupp('variables', {
-            account: {{ (current_user.account_number or '') | tojson }},
-            balance: {{ current_user.balance | tojson }}
-            });
-        } catch (e) { }
+            var script = document.createElement('script');
+            script.async = true;
+            script.crossOrigin = 'anonymous';
+            script.src = 'https://www.smartsupp.com/loader.js';
+
+            script.onerror = function () {
+                console.error('Smartsupp failed to load, trying alternative URL...');
+                var s2 = document.createElement('script');
+                s2.async = true;
+                s2.src = 'https://cdn.smartsupp.com/loader.js';
+                document.head.appendChild(s2);
+            };
+
+            document.head.appendChild(script);
+
+            // Set user info if logged in
+            {% if current_user.is_authenticated %}
+            window._smartsupp.onReady = function (smartsupp) {
+                try {
+                    smartsupp.setName({{ current_user.username | tojson }});
+                smartsupp.setEmail({{ current_user.email | tojson }});
+            smartsupp.setVariables({
+                account: {{ (current_user.account_number or '') | tojson }},
+        balance: { { current_user.balance | tojson } }
+                    });
+                } catch (e) {
+            console.log('Smartsupp user setup:', e);
+        }
+            };
         {% endif %}
-
-        window.openLiveChat = function () {
-            function tryOpen(n) {
-                if (typeof smartsupp === 'function') {
-                    try { smartsupp('chat:open'); } catch (err) { }
-                    if (typeof showToast === 'function') showToast('💬 Live chat opened!', 'info');
-                    return;
-                }
-                if (n < 20) {
-                    setTimeout(function () { tryOpen(n + 1); }, 300);
-                } else if (typeof showToast === 'function') {
-                    showToast('💬 Chat is loading… try again in a moment.', 'info');
-                }
-            }
-            tryOpen(0);
-        };
+        }) ();
     </script>
 
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
