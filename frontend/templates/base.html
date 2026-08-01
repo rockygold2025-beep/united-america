@@ -199,42 +199,61 @@
     </footer>
 
     <!-- Smartsupp Live Chat Widget - CORRECTED VERSION -->
+    <!-- Smartsupp Live Chat Widget - WITH DEBUG LOGGING -->
+    <!-- Smartsupp Live Chat Widget - WITH DEBUG LOGGING -->
     <script type="text/javascript">
-        (function () {
-            window._smartsupp = window._smartsupp || {};
-            window._smartsupp.key = 'ceb4f4e2a03567593b04e1700da9d278167da9e0';
+        console.log('🔍 Smartsupp Debug Start');
+        console.log('📍 Location:', window.location.hostname);
+        console.log('🌐 Protocol:', window.location.protocol);
 
-            var script = document.createElement('script');
-            script.async = true;
-            script.crossOrigin = 'anonymous';
-            script.src = 'https://www.smartsupp.com/loader.js';
+        var _smartsupp = _smartsupp || {};
+        _smartsupp.key = 'ceb4f4e2a03567593b04e1700da9d278167da9e0';
 
-            script.onerror = function () {
-                console.error('Smartsupp failed to load, trying alternative URL...');
-                var s2 = document.createElement('script');
-                s2.async = true;
-                s2.src = 'https://cdn.smartsupp.com/loader.js';
-                document.head.appendChild(s2);
+        console.log('✅ Smartsupp Key Set:', _smartsupp.key);
+
+        (function (d) {
+            var s = d.getElementsByTagName('script')[0];
+            var c = d.createElement('script');
+            c.type = 'text/javascript';
+            c.async = true;
+            c.src = 'https://www.smartsupp.com/loader.js';
+
+            c.onload = function () {
+                console.log('✅ Smartsupp loader.js loaded successfully');
             };
 
-            document.head.appendChild(script);
+            c.onerror = function () {
+                console.error('❌ Failed to load from www.smartsupp.com, trying CDN...');
+                var c2 = d.createElement('script');
+                c2.type = 'text/javascript';
+                c2.async = true;
+                c2.src = 'https://cdn.smartsupp.com/loader.js';
+                c2.onload = function () {
+                    console.log('✅ Smartsupp loaded from CDN');
+                };
+                c2.onerror = function () {
+                    console.error('❌ Smartsupp failed from both URLs');
+                };
+                s.parentNode.insertBefore(c2, s);
+            };
 
-            // Set user info if logged in
-            {% if current_user.is_authenticated %}
-            window._smartsupp.onReady = function (smartsupp) {
-                try {
-                    smartsupp.setName({{ current_user.username | tojson }});
-                smartsupp.setEmail({{ current_user.email | tojson }});
-            smartsupp.setVariables({
-                account: {{ (current_user.account_number or '') | tojson }},
-        balance: { { current_user.balance | tojson } }
-                    });
-                } catch (e) {
-            console.log('Smartsupp user setup:', e);
+            console.log('🚀 Loading Smartsupp from:', c.src);
+            s.parentNode.insertBefore(c, s);
+        })(document);
+
+        // Set user info
+        {% if current_user.is_authenticated %}
+        window._smartsupp.onReady = function (smartsupp) {
+            console.log('👤 Setting Smartsupp user info');
+            try {
+                smartsupp.setName({{ current_user.username | tojson }});
+            smartsupp.setEmail({{ current_user.email | tojson }});
+        console.log('✅ User info set');
+        } catch (e) {
+            console.error('❌ Error setting user info:', e);
         }
-            };
+    };
         {% endif %}
-        }) ();
     </script>
 
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
