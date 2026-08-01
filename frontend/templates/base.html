@@ -193,125 +193,117 @@
     </footer>
 
     <!-- SmartSupp Live Chat -->
+    <!-- Smartsupp Live Chat script -->
     <script type="text/javascript">
         var _smartsupp = _smartsupp || {};
         _smartsupp.key = 'ceb4f4e2a03567593b04e1700da9d278167da9e0';
-        _smartsupp.offsetY = 20;
         window.smartsupp || (function (d) {
-            var s, c, o = smartsupp = function () { o._.push(arguments); };
-            o._ = [];
-            s = d.getElementsByTagName('script')[0];
-            c = d.createElement('script');
-            c.type = 'text/javascript';
-            c.charset = 'utf-8';
-            c.async = true;
-            c.src = 'https://www.smartsuppchat.com/loader.js?';
-            s.parentNode.insertBefore(c, s);
+            var s, c, o = smartsupp = function () { o._.push(arguments) }; o._ = [];
+            s = d.getElementsByTagName('script')[0]; c = d.createElement('script');
+            c.type = 'text/javascript'; c.charset = 'utf-8'; c.async = true;
+            c.src = 'https://www.smartsuppchat.com/loader.js?'; s.parentNode.insertBefore(c, s);
         })(document);
-        {% if current_user.is_authenticated %}
-        try {
-            smartsupp('name', {{ current_user.username | tojson }});
-        smartsupp('email', {{ current_user.email | tojson }});
-        smartsupp('variables', {
-            account: {{ (current_user.account_number or '') | tojson }},
-            balance: {{ current_user.balance | tojson }}
+    </script>
+    {% if current_user.is_authenticated %}
+    try {
+    smartsupp('name', {{ current_user.username | tojson }});
+    smartsupp('email', {{ current_user.email | tojson }});
+    smartsupp('variables', {
+    account: {{ (current_user.account_number or '') | tojson }},
+    balance: {{ current_user.balance | tojson }}
+    });
+    } catch (e) { }
+    {% endif %}
+    // Retry open if widget loads late
+    window.openLiveChat = function () {
+    function tryOpen(n) {
+    if (typeof smartsupp === 'function' || typeof window.smartsupp === 'function') {
+    try { smartsupp('chat:open'); } catch (e) { }
+    if (typeof showToast === 'function') showToast('💬 Live chat opened!', 'info');
+    return;
+    }
+    if (n < 15) setTimeout(function () { tryOpen(n + 1); }, 400); else if (typeof showToast==='function' ) showToast('💬
+        Chat is loading… try again in a moment.', 'info' ); } tryOpen(0); }; </script>
+
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+        <script>
+            var csrfToken = "{{ csrf_token() if csrf_token else '' }}";
+            function getCsrfToken() { return csrfToken; }
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                    }
+                }
             });
-        } catch (e) { }
-        {% endif %}
-        // Retry open if widget loads late
-        window.openLiveChat = function () {
-            function tryOpen(n) {
-                if (typeof smartsupp === 'function' || typeof window.smartsupp === 'function') {
-                    try { smartsupp('chat:open'); } catch (e) { }
-                    if (typeof showToast === 'function') showToast('💬 Live chat opened!', 'info');
-                    return;
-                }
-                if (n < 15) setTimeout(function () { tryOpen(n + 1); }, 400);
-                else if (typeof showToast === 'function') showToast('💬 Chat is loading… try again in a moment.', 'info');
-            }
-            tryOpen(0);
-        };
-    </script>
-
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <script>
-        var csrfToken = "{{ csrf_token() if csrf_token else '' }}";
-        function getCsrfToken() { return csrfToken; }
-        $.ajaxSetup({
-            beforeSend: function (xhr, settings) {
-                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                    xhr.setRequestHeader("X-CSRFToken", csrfToken);
+            function openLiveChat() {
+                if (typeof smartsupp !== 'undefined') {
+                    smartsupp('chat:open');
+                    showToast('💬 Live chat opened!', 'info');
+                } else {
+                    window.location.href = "{{ url_for('main.contact') }}";
                 }
             }
-        });
-        function openLiveChat() {
-            if (typeof smartsupp !== 'undefined') {
-                smartsupp('chat:open');
-                showToast('💬 Live chat opened!', 'info');
-            } else {
-                window.location.href = "{{ url_for('main.contact') }}";
+            function showToast(message, type) {
+                var toast = document.createElement('div');
+                var bgColor = type === 'success' ? '#0a7f42' : type === 'error' ? '#dc2626' : '#3b82f6';
+                toast.style.cssText = 'position:fixed;bottom:100px;right:30px;padding:15px 25px;background:' + bgColor + ';color:white;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);animation:slideUpChat 0.3s ease;max-width:400px;';
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                setTimeout(function () { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(function () { toast.remove(); }, 300); }, 3000);
             }
-        }
-        function showToast(message, type) {
-            var toast = document.createElement('div');
-            var bgColor = type === 'success' ? '#0a7f42' : type === 'error' ? '#dc2626' : '#3b82f6';
-            toast.style.cssText = 'position:fixed;bottom:100px;right:30px;padding:15px 25px;background:' + bgColor + ';color:white;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);animation:slideUpChat 0.3s ease;max-width:400px;';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(function () { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(function () { toast.remove(); }, 300); }, 3000);
-        }
-        document.head.insertAdjacentHTML('beforeend', '<style>@keyframes slideUpChat{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}</style>');
-    </script>
+            document.head.insertAdjacentHTML('beforeend', '<style>@keyframes slideUpChat{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}</style>');
+        </script>
 
-    <div id="google_translate_element" aria-hidden="true"></div>
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-            if (typeof google === 'undefined' || !google.translate) return;
-            new google.translate.TranslateElement({
-                pageLanguage: 'en',
-                includedLanguages: 'en,es,fr,de,ko,zh-CN,ar,pt,ja,ms,th,tr',
-                autoDisplay: false,
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-            }, 'google_translate_element');
-        }
-    </script>
-    <script type="text/javascript"
-        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
-
-    <!-- Cold-start / loading overlay (shows while app wakes on free hosting) -->
-    <div id="uba-loading-overlay" aria-hidden="true">
-        <div class="uba-spinner"></div>
-        <h2>United Bank of America</h2>
-        <p>Securing your session… please wait a moment.</p>
-    </div>
-    <script>
-        (function () {
-            var overlay = document.getElementById('uba-loading-overlay');
-            var KEY = 'uba_last_ping';
-            var now = Date.now();
-            var last = parseInt(localStorage.getItem(KEY) || '0', 10);
-            // If more than 10 minutes since last visit, show brief branded loader
-            if (now - last > 10 * 60 * 1000) {
-                overlay.classList.add('active');
-                setTimeout(function () {
-                    overlay.classList.remove('active');
-                }, 1800);
+        <div id="google_translate_element" aria-hidden="true"></div>
+        <script type="text/javascript">
+            function googleTranslateElementInit() {
+                if (typeof google === 'undefined' || !google.translate) return;
+                new google.translate.TranslateElement({
+                    pageLanguage: 'en',
+                    includedLanguages: 'en,es,fr,de,ko,zh-CN,ar,pt,ja,ms,th,tr',
+                    autoDisplay: false,
+                    layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+                }, 'google_translate_element');
             }
-            localStorage.setItem(KEY, String(now));
-            // Soft keep-alive ping every 12 minutes while tab is open (helps free-tier sleep)
-            setInterval(function () {
-                try {
-                    fetch('/', { method: 'HEAD', credentials: 'same-origin', cache: 'no-store' })
-                        .then(function () { localStorage.setItem(KEY, String(Date.now())); })
-                        .catch(function () { });
-                } catch (e) { }
-            }, 12 * 60 * 1000);
-        })();
-    </script>
+        </script>
+        <script type="text/javascript"
+            src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-    {% block scripts %}{% endblock %}
+
+        <!-- Cold-start / loading overlay (shows while app wakes on free hosting) -->
+        <div id="uba-loading-overlay" aria-hidden="true">
+            <div class="uba-spinner"></div>
+            <h2>United Bank of America</h2>
+            <p>Securing your session… please wait a moment.</p>
+        </div>
+        <script>
+            (function () {
+                var overlay = document.getElementById('uba-loading-overlay');
+                var KEY = 'uba_last_ping';
+                var now = Date.now();
+                var last = parseInt(localStorage.getItem(KEY) || '0', 10);
+                // If more than 10 minutes since last visit, show brief branded loader
+                if (now - last > 10 * 60 * 1000) {
+                    overlay.classList.add('active');
+                    setTimeout(function () {
+                        overlay.classList.remove('active');
+                    }, 1800);
+                }
+                localStorage.setItem(KEY, String(now));
+                // Soft keep-alive ping every 12 minutes while tab is open (helps free-tier sleep)
+                setInterval(function () {
+                    try {
+                        fetch('/', { method: 'HEAD', credentials: 'same-origin', cache: 'no-store' })
+                            .then(function () { localStorage.setItem(KEY, String(Date.now())); })
+                            .catch(function () { });
+                    } catch (e) { }
+                }, 12 * 60 * 1000);
+            })();
+        </script>
+
+        {% block scripts %}{% endblock %}
 </body>
 
 </html>
